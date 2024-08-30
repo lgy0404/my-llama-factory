@@ -1,0 +1,59 @@
+### model
+model_name_or_path: /remote-home/iot_liuguangyi/data/llms/hub/models--Qwen--Qwen2-1.5B-Instruct/
+
+### method
+stage: sft
+do_train: true
+finetuning_type: lora
+lora_target: all
+# deepspeed: examples/deepspeed/ds_z3_config.json
+num_train_epochs: 5
+
+### lora
+lora_rank: 64
+lora_alpha: 128
+lora_dropout: 0.3
+
+### dataset
+dataset: android_control_train
+eval_dataset: android_control_validation
+dataset_dir: data
+template: qwen
+cutoff_len: 4096
+max_samples: 100000
+preprocessing_num_workers: 16
+
+### output
+output_dir: /remote-home/iot_liuguangyi/data/llamafactory/app/saves/Qwen2-1.5B-Instruct/lora/train_2024-08-24-10-16-01
+logging_steps: 1
+save_steps: 500
+plot_loss: true
+# overwrite_output_dir: true
+report_to: none
+
+### train (total_batch_size: 16 vs lr 1e-4)
+per_device_train_batch_size: 1
+gradient_accumulation_steps: 4
+learning_rate: 1.0e-04
+lr_scheduler_type: constant_with_warmup 
+warmup_steps: 100
+bf16: true
+ddp_timeout: 180000000
+max_grad_norm: 1.0
+flash_attn: fa2 # auto
+# use_unsloth: true
+# use_adam_mini: true
+optim: adamw_torch
+
+include_num_input_tokens_seen: true
+packing: false
+
+
+
+### eval
+# do_eval: true
+per_device_eval_batch_size: 1
+eval_strategy: steps
+eval_steps: 500
+# do_predict: true
+predict_with_generate: true
