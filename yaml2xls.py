@@ -1,6 +1,7 @@
 import os
 import yaml
 import pandas as pd
+import json
 
 # Directory containing the YAML files
 directory = os.path.join(os.getcwd(), 'sft_config')
@@ -13,26 +14,25 @@ for filename in os.listdir(directory):
     if filename.endswith('.yaml'):
         # Open the YAML file and load the content
         with open(os.path.join(directory, filename), 'r') as file:
-            content = file.read()
+            yaml_content = yaml.safe_load(file)
         
-        # Parse the file content line by line, extracting the key-value pairs
-        yaml_data = {}
-        for line in content.splitlines():
-            line = line.strip()  # Remove leading/trailing spaces
-            # Skip lines that are comments (starting with #) or empty
-            if not line or line.startswith('#'):
-                continue
-            
-            # Only process lines that follow the "key: value" format
-            if ':' in line:
-                # Split the line into key and value
-                key, value = line.split(':', 1)
-                key = key.strip()  # Remove any leading/trailing spaces
-                value = value.strip()  # Remove any leading/trailing spaces
-                yaml_data[key] = value
+        # Extract the output_dir from the YAML content
+        output_dir = yaml_content.get('output_dir', '')
         
-        # Add the filename to the content for tracking
-        yaml_data['File'] = filename
+        # Initialize a dictionary to store the YAML content and results
+        yaml_data = {'File': filename}
+        
+        # Add all key-value pairs from the YAML file to the dictionary
+        for key, value in yaml_content.items():
+            yaml_data[key] = value
+        
+        # Check if output_dir is specified and the corresponding JSON file exists
+        if output_dir:
+            results_file = os.path.join(output_dir, 'all_results.json')
+            if os.path.exists(results_file):
+                with open(results_file, 'r') as result_file:
+                    results_content = json.load(result_file)
+                    yaml_data.update(results_content)
         
         # Store the data
         data.append(yaml_data)
